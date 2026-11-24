@@ -1,0 +1,49 @@
+\documentclass[11pt,a4paper]{article}
+
+% ---------------------------------------------------------------- paquetes
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[spanish,es-noshorthands,es-tabla]{babel}
+\usepackage{lmodern}
+\usepackage[margin=2.5cm]{geometry}
+\usepackage{amsmath,amssymb,amsthm,bm}
+\usepackage{graphicx}
+\usepackage{subcaption}
+\usepackage{booktabs}
+\usepackage{xcolor}
+\usepackage{csquotes}
+\usepackage[backend=biber,style=numeric-comp,sorting=nyt,maxbibnames=99,giveninits=true]{biblatex}
+\addbibresource{refs.bib}
+\usepackage[colorlinks=true,linkcolor=blue!60!black,citecolor=blue!60!black,urlcolor=blue!60!black]{hyperref}
+\usepackage[spanish,capitalise,nameinlink]{cleveref}
+\crefname{section}{Sección}{Secciones}
+\crefname{figure}{Figura}{Figuras}
+
+\graphicspath{{../figuras/}}
+
+% ---------------------------------------------------------------- notación
+\input{notacion}
+
+% ---------------------------------------------------------------- portada
+\title{Colapso de rango en anchura:\\
+  un análisis espectral de las capas de atención}
+\author{% TODO: nombres completos
+  Autora~A \and Autora~B}
+\date{\today}
+
+\begin{document}
+\maketitle
+
+\begin{abstract}
+  \pendiente{Resumen de 4--5 líneas (se escribe al final).}
+\end{abstract}
+
+\input{secciones/1_introduccion}
+\input{secciones/2_gap_anchura}
+\input{secciones/3_profundidad_gradientes}
+\input{secciones/4_arreglo}
+\input{secciones/5_conclusiones}
+
+\printbibliography
+
+\end{document}

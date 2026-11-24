@@ -1,0 +1,54 @@
+% Responsable: @victoriaguilllen · Revisora: @gvidalquadras (issue #16)
+\section{Introducción}\label{sec:intro}
+
+Los transformers~\cite{vaswani2017attention} son la arquitectura dominante en
+el aprendizaje profundo actual, y su pieza central es la capa de atención.
+Dada una secuencia de $n$ tokens de dimensión $d$, apilados en una matriz
+$X \in \R^{n\times d}$, la atención con softmax calcula
+\begin{equation}\label{eq:atencion}
+  A(X) = \softmax\!\left(\frac{X \Wq \Wk^{\top} X^{\top}}{\sqrt{d_k}}\right),
+  \qquad X \mapsto A(X)\, X \Wv ,
+\end{equation}
+donde $\Wq, \Wk \in \R^{d\times d_k}$ y $\Wv \in \R^{d\times d}$ son matrices de
+pesos y la softmax se aplica fila a fila. Por construcción, $A$ es
+\emph{estocástica por filas}: sus entradas son positivas y $A\ones = \ones$,
+de modo que cada token de salida es una media ponderada de los tokens de
+entrada.
+
+Que una red profunda se pueda entrenar depende en buena medida de cómo se
+propagan la señal y los gradientes en la inicialización. En los transformers se
+conocen dos patologías. La primera, común a muchas arquitecturas, es que los
+gradientes se desvanezcan o exploten con la
+profundidad~\cite{hanin2018which}. La segunda es el \emph{colapso de rango en
+profundidad}: \textcite{dong2021attention} muestran que, en una red formada solo
+por capas de atención, la salida converge de forma doblemente exponencial con
+el número de capas a una matriz de rango~1, es decir, todos los tokens acaban
+teniendo la misma representación. \textcite{noci2022signal} relacionan este
+colapso con el desvanecimiento de los gradientes de las queries y las keys,
+estudiando para ello el caso de atención uniforme.
+
+\textcite{naitsaada2025mind} identifican un tercer fenómeno, propio de la atención
+con softmax: el \emph{colapso de rango en anchura}. Incluso con una única capa,
+las representaciones de los tokens se concentran en un único punto a medida que
+crece la longitud de contexto~$n$. El origen es espectral. En la inicialización,
+con pesos gaussianos y entrada isométrica ($XX^{\top} = I$), la matriz de
+atención se comporta como una matriz de Markov aleatoria~\cite{bordenave2011circular}:
+su mayor valor singular es~$1$, asociado a la dirección~$\ones$, mientras que
+los demás son de orden $O(n^{-1/2})$. Este \emph{spectral gap} hace que
+$A \approx \tfrac{1}{n}\ones\ones^{\top}$, una matriz que sustituye cada token
+por la media de todos, y el rango estable~\cite{rudelson2007sampling} de la
+salida tiende a~$1$. Visto así, suponer atención uniforme, como
+en~\cite{noci2022signal}, equivale a partir de un colapso en anchura ya
+consumado. Además, el gap agrava el colapso en profundidad y los problemas de
+los gradientes. Los autores proponen un arreglo sencillo: eliminar el valor
+atípico y usar $\Aperp = A - \tfrac{1}{n}\ones\ones^{\top}$, cuyo rango estable
+crece linealmente con~$n$.
+
+En este trabajo resumimos estos resultados y los reproducimos numéricamente. La
+\cref{sec:gap} presenta las definiciones y el resultado principal sobre el gap
+espectral y el colapso en anchura. La \cref{sec:profundidad} estudia sus
+consecuencias en profundidad y en los gradientes, y la \cref{sec:arreglo}, el
+arreglo propuesto. Cerramos con conclusiones y limitaciones en la
+\cref{sec:conclusiones}. A lo largo del informe, $n$ denota la longitud de
+contexto, que en~\cite{naitsaada2025mind} se llama~$T$. El código de los
+experimentos está en el repositorio del proyecto.

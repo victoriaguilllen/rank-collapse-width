@@ -1,0 +1,25 @@
+% Notación común del informe. Usad estas macros para que todo sea coherente.
+%   n      : longitud de contexto (número de tokens); el paper la llama T
+%   d      : dimensión de los tokens; d_k la de queries/keys
+%   X      : matriz de tokens, n x d
+%   A      : matriz de atención, n x n, estocástica por filas
+\newcommand{\R}{\mathbb{R}}
+\newcommand{\E}{\mathbb{E}}
+\newcommand{\ones}{\mathbf{1}}                     % vector de unos
+\newcommand{\Aperp}{A^{\perp}}                     % atención sin el gap
+\newcommand{\Wq}{W_Q}
+\newcommand{\Wk}{W_K}
+\newcommand{\Wv}{W_V}
+\DeclareMathOperator{\softmax}{softmax}
+\DeclareMathOperator{\sr}{sr}                      % stable rank
+\newcommand{\norm}[1]{\lVert #1 \rVert}
+\newcommand{\normF}[1]{\lVert #1 \rVert_F}
+
+% Texto pendiente: sale en naranja en el PDF para que no se olvide
+\newcommand{\pendiente}[1]{{\color{orange!80!black}\textbf{[Pendiente]} #1}}
+
+\theoremstyle{plain}
+\newtheorem{teorema}{Teorema}
+\newtheorem{proposicion}{Proposición}
+\theoremstyle{definition}
+\newtheorem{definicion}{Definición}
