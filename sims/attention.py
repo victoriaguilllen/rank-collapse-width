@@ -20,14 +20,19 @@ def random_attention_matrix(
     """Matriz de atención A = softmax(X W_Q W_Kᵀ Xᵀ / (√d_k · temperature)).
 
     Si no se pasan, W_Q y W_K ∈ R^{d×d_k} se muestrean con entradas
-    i.i.d. N(0, σ²/d). Con σ = 1 y d_k = d coincide con la inicialización
-    `xavier_normal` del repo de referencia (desviación típica 1/√d).
+    i.i.d. N(0, σ²), como en la ec. (1) del paper (σ = σ_qk). Con entrada
+    isométrica (X Xᵀ = I) los logits son O(1) y se cumple el Teorema 1:
+    σ₁(A) → 1 y √n·σ₂(A) → 2σ.
+
+    Ojo con la escala de X: con filas de norma ≈ √d (p. ej. X gaussiana) hay
+    que usar sigma ≈ 1/√d (la `xavier_normal` del repo de los autores) para
+    que los logits sigan siendo O(1).
 
     Parámetros
     ----------
     X : array (n, d)
     d_k : dimensión de queries/keys (por defecto d)
-    sigma : escala de los pesos
+    sigma : desviación típica de las entradas de W_Q y W_K (σ_qk)
     temperature : divide los logits; >1 suaviza A, <1 la concentra
     rng : np.random.Generator o semilla, para reproducibilidad
     W_Q, W_K : pesos fijos (d, d_k); si se dan, se ignoran sigma y rng
@@ -44,11 +49,10 @@ def random_attention_matrix(
         d_k = W_Q.shape[1] if W_Q is not None else d
 
     rng = np.random.default_rng(rng)
-    std = sigma / np.sqrt(d)
     if W_Q is None:
-        W_Q = rng.normal(0.0, std, size=(d, d_k))
+        W_Q = rng.normal(0.0, sigma, size=(d, d_k))
     if W_K is None:
-        W_K = rng.normal(0.0, std, size=(d, d_k))
+        W_K = rng.normal(0.0, sigma, size=(d, d_k))
 
     logits = (X @ W_Q) @ (X @ W_K).T / (np.sqrt(d_k) * temperature)
     logits -= logits.max(axis=1, keepdims=True)  # softmax numéricamente estable

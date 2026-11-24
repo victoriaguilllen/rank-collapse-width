@@ -48,18 +48,18 @@ def test_softmax_estable_con_logits_grandes(X):
 
 def test_temperatura(X):
     # temperatura muy alta → A ≈ (1/n) 𝟙𝟙ᵀ
-    A = random_attention_matrix(X, rng=0, temperature=1e8)
+    A = random_attention_matrix(X, rng=0, temperature=1e12)
     np.testing.assert_allclose(A, 1 / X.shape[0], rtol=1e-6)
 
 
 @pytest.mark.parametrize("sigma,d_k", [(1.0, None), (2.0, 8)])
-def test_pesos_por_defecto_son_normales_sigma_entre_raiz_d(X, sigma, d_k):
-    # Los pesos por defecto deben ser W_Q, W_K ~ N(0, σ²/d), muestreados en ese orden.
+def test_pesos_por_defecto_son_normales_sigma(X, sigma, d_k):
+    # Los pesos por defecto deben ser W_Q, W_K ~ N(0, σ²), muestreados en ese orden.
     d = X.shape[1]
     k = d if d_k is None else d_k
     rng = np.random.default_rng(5)
-    W_Q = rng.normal(0.0, sigma / np.sqrt(d), size=(d, k))
-    W_K = rng.normal(0.0, sigma / np.sqrt(d), size=(d, k))
+    W_Q = rng.normal(0.0, sigma, size=(d, k))
+    W_K = rng.normal(0.0, sigma, size=(d, k))
     np.testing.assert_allclose(
         random_attention_matrix(X, d_k, sigma=sigma, rng=5),
         random_attention_matrix(X, W_Q=W_Q, W_K=W_K),
@@ -82,3 +82,15 @@ def test_stable_rank_acotado(X):
 def test_stable_rank_matriz_uniforme_es_uno():
     n = 50
     assert stable_rank(np.full((n, n), 1 / n)) == pytest.approx(1)
+
+
+def test_teorema_1_entrada_isometrica():
+    # X Xᵀ = I y pesos N(0, 1): σ₁(A) ≈ 1 y √n·σ₂(A) = O(1), sin depender de n
+    escalados = []
+    for n in (64, 256):
+        rng = np.random.default_rng(n)
+        X = np.linalg.qr(rng.normal(size=(n, n)))[0]
+        s = np.linalg.svd(random_attention_matrix(X, rng=rng), compute_uv=False)
+        assert s[0] == pytest.approx(1, abs=0.05)
+        escalados.append(np.sqrt(n) * s[1])
+    assert escalados[1] == pytest.approx(escalados[0], rel=0.25)

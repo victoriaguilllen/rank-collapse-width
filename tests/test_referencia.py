@@ -57,8 +57,8 @@ def test_misma_escala_de_pesos_que_xavier():
     torch.manual_seed(0)
     ref = Ref(d, d, distribution_Q="xavier_normal", distribution_K="xavier_normal")
     std_ref = ref.query_embed.weight.detach().numpy().std()
-    W = np.random.default_rng(0).normal(0.0, 1 / np.sqrt(d), size=(d, d))
-    assert std_ref == pytest.approx(W.std(), rel=0.02)
+    # xavier_normal con d_k = d equivale a sigma = 1/√d en random_attention_matrix
+    assert std_ref == pytest.approx(1 / np.sqrt(d), rel=0.02)
 
 
 def test_stable_rank_de_la_referencia_es_el_de_X_Xt():
