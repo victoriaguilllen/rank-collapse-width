@@ -1,0 +1,31 @@
+% Responsable: @victoriaguilllen · Revisora: @gvidalquadras (issue #16)
+\section{Introducción}\label{sec:intro}
+
+Los transformers~\cite{vaswani2017attention} se basan en la capa de atención.
+En ella, cada token de salida es una media ponderada de los $n$ tokens de
+entrada. Los pesos de esas medias forman la matriz de atención
+\begin{equation}\label{eq:atencion}
+  A = \softmax\!\left(\frac{X \Wq \Wk^{\top} X^{\top}}{\sqrt{d_k}}\right),
+\end{equation}
+donde $X \in \R^{n\times d}$ contiene los tokens y la softmax se aplica por
+filas, así que cada fila de $A$ suma~$1$.
+
+Se sabe que, al apilar muchas capas de atención, todos los tokens acaban siendo
+iguales. Es el \emph{colapso de rango en profundidad}~\cite{dong2021attention},
+que además provoca que algunos gradientes se desvanezcan y dificulta el
+entrenamiento~\cite{noci2022signal}.
+
+\textcite{naitsaada2025mind} muestran que el problema aparece incluso con una
+sola capa cuando la secuencia es larga: es el \emph{colapso de rango en
+anchura}. La causa está en los valores singulares de $A$. Al inicializar la
+red, el mayor vale~$1$ y todos los demás son mucho más pequeños, del orden de
+$1/\sqrt{n}$. Por esta diferencia, llamada \emph{gap espectral}, $A$ se parece a
+$\tfrac{1}{n}\ones\ones^{\top}$, la matriz que sustituye cada token por la media
+de todos, y la salida pierde casi toda su información. La solución que proponen
+es quitar esa parte: usar $\Aperp = A - \tfrac{1}{n}\ones\ones^{\top}$.
+
+En este trabajo explicamos estas ideas y las comprobamos con simulaciones. La
+\cref{sec:gap} trata el gap espectral y el colapso en anchura; la
+\cref{sec:profundidad}, sus efectos en profundidad y en los gradientes; la
+\cref{sec:arreglo}, el arreglo, y la \cref{sec:conclusiones}, las conclusiones.
+Llamamos $n$ al número de tokens (en el paper, $T$).

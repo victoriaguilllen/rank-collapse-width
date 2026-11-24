@@ -221,3 +221,6 @@ __marimo__/
 
 # Streamlit
 .streamlit/secrets.toml
+
+# LaTeX: el PDF se genera con `make -C informe pdf`
+informe/informe.pdf
